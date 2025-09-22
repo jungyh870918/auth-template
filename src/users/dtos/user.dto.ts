@@ -5,5 +5,17 @@ export class UserDto {
   id: number;
 
   @Expose()
-  email: string;
+  email: string | null;
+
+  @Expose()
+  provider?: string | null;
+
+  @Expose()
+  providerId?: string | null;
+
+  @Expose()
+  name?: string | null;
+
+  @Expose()
+  avatarUrl?: string | null;
 }

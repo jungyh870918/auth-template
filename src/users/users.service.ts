@@ -47,4 +47,25 @@ export class UsersService {
     user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await this.repo.save(user);
   }
+
+  async upsertOAuthUser(params: {
+    provider: 'kakao';
+    providerId: string;
+    email?: string | null;
+    name?: string | null;
+    avatarUrl?: string | null;
+  }) {
+    const { provider, providerId, email, name, avatarUrl } = params;
+    let user = await this.repo.findOne({ where: { provider, providerId } });
+    if (!user) {
+      user = this.repo.create({
+        email: email ?? null,
+        password: '!',
+        provider,
+        providerId,
+        // name, avatarUrl 컬럼이 있으면 할당
+      });
+    }
+    return this.repo.save(user);
+  }
 }

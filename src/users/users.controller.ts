@@ -10,6 +10,7 @@ import {
   NotFoundException,
   Session,
   UseGuards,
+  Redirect,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -21,6 +22,7 @@ import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from './user.entity';
 import { AuthGuard } from '../guards/auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -28,7 +30,27 @@ export class UsersController {
   constructor(
     private usersService: UsersService,
     private authService: AuthService,
+    private configService: ConfigService,
   ) {}
+
+  @Get('/kakao/login')
+  @Redirect() // 기본 302
+  kakaoLogin() {
+    const clientId = this.configService.get<string>('KAKAO_CLIENT_ID')!;
+    const redirectUri = encodeURIComponent(
+      this.configService.get<string>('KAKAO_REDIRECT_URI')!,
+    );
+    const url =
+      `https://kauth.kakao.com/oauth/authorize?response_type=code` +
+      `&client_id=${clientId}&redirect_uri=${redirectUri}`;
+
+    return { url };
+  }
+
+  @Get('/kakao/callback')
+  async kakaoCallback(@Query('code') code: string) {
+    return this.authService.signInWithKakao(code);
+  }
 
   @Get('/whoami')
   @UseGuards(AuthGuard) // ✅ access token 필요

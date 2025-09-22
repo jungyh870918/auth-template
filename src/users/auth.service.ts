@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import {
   Injectable,
   BadRequestException,
@@ -8,6 +10,7 @@ import { UsersService } from './users.service';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { TokenService } from '../common/token/token.service'; // ✅ TokenService import
+import { ConfigService } from '@nestjs/config';
 
 const scrypt = promisify(_scrypt);
 
@@ -16,7 +19,61 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private tokenService: TokenService, // ✅ 주입
+    private configService: ConfigService,
   ) {}
+
+  async signInWithKakao(code: string) {
+    const client_id = this.configService.get<string>('KAKAO_CLIENT_ID')!;
+    const redirect_uri = this.configService.get<string>('KAKAO_REDIRECT_URI')!;
+    const client_secret = this.configService.get<string>('KAKAO_CLIENT_SECRET');
+
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id,
+      redirect_uri,
+      code,
+    });
+    if (client_secret) body.append('client_secret', client_secret);
+
+    const tokenRes = await axios.post(
+      'https://kauth.kakao.com/oauth/token',
+      body,
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
+    );
+    const kakaoAccessToken = tokenRes.data.access_token as string;
+
+    const meRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
+      headers: { Authorization: `Bearer ${kakaoAccessToken}` },
+    });
+
+    const kakaoId = String(meRes.data.id);
+    const kakaoAccount = meRes.data.kakao_account ?? {};
+    const profile = kakaoAccount.profile ?? {};
+    const email: string | undefined = kakaoAccount.email;
+    const name: string | undefined = profile.nickname;
+    const avatarUrl: string | undefined = profile.profile_image_url;
+
+    const user = await this.usersService.upsertOAuthUser({
+      provider: 'kakao',
+      providerId: kakaoId,
+      email: email ?? null,
+      name: name ?? null,
+      avatarUrl: avatarUrl ?? null,
+    });
+
+    const accessToken = await this.tokenService.generateAccessToken({
+      id: user.id,
+      tokenVersion: user.tokenVersion,
+    });
+    const refreshToken = await this.tokenService.generateRefreshToken({
+      id: user.id,
+      tokenVersion: user.tokenVersion,
+    });
+
+    return { user, accessToken, refreshToken };
+  }
 
   async signup(email: string, password: string) {
     // 1. 이메일 중복 체크
