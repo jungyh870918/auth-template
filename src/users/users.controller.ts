@@ -10,7 +10,7 @@ import {
   NotFoundException,
   Session,
   UseGuards,
-  Redirect,
+  Res,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -23,6 +23,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from './user.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -34,17 +35,16 @@ export class UsersController {
   ) {}
 
   @Get('/kakao/login')
-  @Redirect() // 기본 302
-  kakaoLogin() {
-    const clientId = this.configService.get<string>('KAKAO_CLIENT_ID')!;
-    const redirectUri = encodeURIComponent(
-      this.configService.get<string>('KAKAO_REDIRECT_URI')!,
-    );
+  kakaoLogin(@Res() res: Response) {
+    const clientId = this.configService.get<string>('KAKAO_REST_API_KEY')!;
+    const redirectUri = this.configService.get<string>('KAKAO_REDIRECT_URI')!;
     const url =
       `https://kauth.kakao.com/oauth/authorize?response_type=code` +
-      `&client_id=${clientId}&redirect_uri=${redirectUri}`;
-
-    return { url };
+      `&client_id=${clientId}&redirect_uri=${encodeURIComponent(
+        redirectUri,
+      )}&scope=profile_nickname,account_email
+`;
+    return res.redirect(url); // 인터셉터 영향 없음
   }
 
   @Get('/kakao/callback')

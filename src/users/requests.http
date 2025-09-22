@@ -21,27 +21,27 @@ POST http://localhost:3000/auth/refresh
 content-type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsInYiOjAsImp0aSI6ImM2NWMzYThmLThiNDctNGQ4Zi04ZjNhLTFmYzk5M2ZhNTY3OCIsInR5cCI6InJlZnJlc2giLCJpYXQiOjE3NTg1NTMzMDIsImV4cCI6MTc1OTE1ODEwMn0.Og5lQ_XkPBmKDutelKCVPuu5AwM5tncJjfeTZREdYpM"
+  "refreshToken": "PASTE_REFRESH_TOKEN_HERE"
 }
 
 ### Get the currently signed in user (protected)
 GET http://localhost:3000/auth/whoami
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
+Authorization: Bearer PASTE_ACCESS_TOKEN_HERE
 
 ### Sign out
 POST http://localhost:3000/auth/signout
 
 ### Find a particular user with a given ID (protected)
 GET http://localhost:3000/auth/4
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
+Authorization: Bearer PASTE_ACCESS_TOKEN_HERE
 
 ### Find all users with a given email (protected)
 GET http://localhost:3000/auth?email=asdf@asdf.com
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
+Authorization: Bearer PASTE_ACCESS_TOKEN_HERE
 
 ### Delete a user given id (protected)
 DELETE http://localhost:3000/auth/3
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU2MzQ0NSwiZXhwIjoxNzU4NTY0MzQ1fQ.0J6UE9ZKFP39gUE_7GTzpkquXtN1aFotKKOtL99Nd_Q
 
 ### Update a user (protected)
 PATCH http://localhost:3000/auth/4
@@ -51,3 +51,20 @@ content-type: application/json
 {
   "password": "aaaaa"
 }
+
+# --------------------------------------------------------------------
+# Kakao Login Flow
+# --------------------------------------------------------------------
+
+### Step 1 — Kakao Login (open in browser, not in REST client)
+# 이 요청은 실제로 브라우저에서 실행해야 카카오 동의창이 뜹니다.
+GET http://localhost:3000/auth/kakao/login
+
+### Step 2 — Kakao Callback (exchange code → user + tokens)
+# 카카오에서 redirect_uri로 리다이렉트되면서 붙여준 code 값을 아래에 직접 넣어 호출합니다.
+GET http://localhost:3000/auth/kakao/callback?code=PASTE_CODE_HERE
+
+### Step 3 — Whoami with Kakao token (protected)
+# Step 2 응답에서 받은 accessToken을 사용해 보호된 API 호출
+GET http://localhost:3000/auth/whoami
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU2MzQ0NSwiZXhwIjoxNzU4NTY0MzQ1fQ.0J6UE9ZKFP39gUE_7GTzpkquXtN1aFotKKOtL99Nd_Q

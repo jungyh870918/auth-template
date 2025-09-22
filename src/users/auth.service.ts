@@ -23,56 +23,70 @@ export class AuthService {
   ) {}
 
   async signInWithKakao(code: string) {
-    const client_id = this.configService.get<string>('KAKAO_CLIENT_ID')!;
-    const redirect_uri = this.configService.get<string>('KAKAO_REDIRECT_URI')!;
-    const client_secret = this.configService.get<string>('KAKAO_CLIENT_SECRET');
+    try {
+      const client_id = this.configService.get<string>('KAKAO_REST_API_KEY')!;
+      const redirect_uri =
+        this.configService.get<string>('KAKAO_REDIRECT_URI')!;
+      const client_secret = this.configService.get<string>(
+        'KAKAO_CLIENT_SECRET',
+      );
 
-    const body = new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id,
-      redirect_uri,
-      code,
-    });
-    if (client_secret) body.append('client_secret', client_secret);
+      const body = new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id,
+        redirect_uri,
+        code,
+      });
+      if (client_secret) body.append('client_secret', client_secret);
 
-    const tokenRes = await axios.post(
-      'https://kauth.kakao.com/oauth/token',
-      body,
-      {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      },
-    );
-    const kakaoAccessToken = tokenRes.data.access_token as string;
+      const tokenRes = await axios.post(
+        'https://kauth.kakao.com/oauth/token',
+        body,
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+      );
+      console.log('tokenRes.data:', tokenRes.data);
 
-    const meRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
-      headers: { Authorization: `Bearer ${kakaoAccessToken}` },
-    });
+      const kakaoAccessToken = tokenRes.data.access_token as string;
 
-    const kakaoId = String(meRes.data.id);
-    const kakaoAccount = meRes.data.kakao_account ?? {};
-    const profile = kakaoAccount.profile ?? {};
-    const email: string | undefined = kakaoAccount.email;
-    const name: string | undefined = profile.nickname;
-    const avatarUrl: string | undefined = profile.profile_image_url;
+      const meRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
+        headers: { Authorization: `Bearer ${kakaoAccessToken}` },
+      });
+      console.log('meRes.data:', meRes.data);
 
-    const user = await this.usersService.upsertOAuthUser({
-      provider: 'kakao',
-      providerId: kakaoId,
-      email: email ?? null,
-      name: name ?? null,
-      avatarUrl: avatarUrl ?? null,
-    });
+      const kakaoId = String(meRes.data.id);
+      const kakaoAccount = meRes.data.kakao_account ?? {};
+      const profile = kakaoAccount.profile ?? {};
+      const email: string | undefined = kakaoAccount.email;
+      const name: string | undefined = profile.nickname;
+      const avatarUrl: string | undefined = profile.profile_image_url;
 
-    const accessToken = await this.tokenService.generateAccessToken({
-      id: user.id,
-      tokenVersion: user.tokenVersion,
-    });
-    const refreshToken = await this.tokenService.generateRefreshToken({
-      id: user.id,
-      tokenVersion: user.tokenVersion,
-    });
+      const user = await this.usersService.upsertOAuthUser({
+        provider: 'kakao',
+        providerId: kakaoId,
+        email: email ?? null,
+        name: name ?? null,
+        avatarUrl: avatarUrl ?? null,
+      });
 
-    return { user, accessToken, refreshToken };
+      const accessToken = await this.tokenService.generateAccessToken({
+        id: user.id,
+        tokenVersion: user.tokenVersion,
+      });
+      const refreshToken = await this.tokenService.generateRefreshToken({
+        id: user.id,
+        tokenVersion: user.tokenVersion,
+      });
+
+      return { user, accessToken, refreshToken };
+    } catch (e: any) {
+      if (e.response) {
+        console.error('Error status:', e.response.status);
+        console.error('Error data:', e.response.data);
+      } else {
+        console.error('Error message:', e.message);
+      }
+      throw e;
+    }
   }
 
   async signup(email: string, password: string) {
