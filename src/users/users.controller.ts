@@ -11,6 +11,8 @@ import {
   Session,
   UseGuards,
   Res,
+  Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -24,6 +26,8 @@ import { User } from './user.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { Redis } from 'ioredis';
+import * as crypto from 'crypto';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -32,35 +36,53 @@ export class UsersController {
     private usersService: UsersService,
     private authService: AuthService,
     private configService: ConfigService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
   @Get('/kakao/login')
-  kakaoLogin(@Res() res: Response) {
+  async kakaoLogin(@Res() res: Response) {
     const clientId = this.configService.get<string>('KAKAO_REST_API_KEY')!;
     const redirectUri = this.configService.get<string>('KAKAO_REDIRECT_URI')!;
+    const state = crypto.randomUUID();
+    await this.redis.set(`oauth:state:${state}`, '1', 'EX', 300); // 5분 TTL
+
     const url =
       `https://kauth.kakao.com/oauth/authorize?response_type=code` +
-      `&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-        redirectUri,
-      )}&scope=profile_nickname,account_email
-`;
+      `&client_id=${clientId}&redirect_uri=${redirectUri}` +
+      `&scope=${encodeURIComponent('profile_nickname,account_email')}` +
+      `&state=${encodeURIComponent(state)}`;
     return res.redirect(url); // 인터셉터 영향 없음
   }
 
   @Get('/kakao/callback')
-  async kakaoCallback(@Query('code') code: string) {
+  async kakaoCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+  ) {
+    if (!state) {
+      throw new BadRequestException('missing state');
+    }
+
+    const key = `oauth:state:${state}`;
+
+    const saved = await this.redis.getdel(key);
+
+    if (!saved) {
+      throw new BadRequestException('invalid state');
+    }
+
     return this.authService.signInWithKakao(code);
   }
 
   @Get('/whoami')
   @UseGuards(AuthGuard) // ✅ access token 필요
   whoAmI(@CurrentUser() user: User) {
-    return user;
+    return { user };
   }
 
   @Post('/refresh')
   async refresh(@Body() body: RefreshDto) {
-    return this.authService.rotateRefreshToken(body.refreshToken);
+    return await this.authService.rotateRefreshToken(body.refreshToken);
   }
 
   @Post('/signout')
@@ -95,7 +117,7 @@ export class UsersController {
     if (!user) {
       throw new NotFoundException('user not found');
     }
-    return user;
+    return { user };
   }
 
   @Get()
@@ -106,13 +128,16 @@ export class UsersController {
 
   @Delete('/:id')
   @UseGuards(AuthGuard) // ✅ 삭제 보호
-  removeUser(@Param('id') id: string) {
-    return this.usersService.remove(parseInt(id));
+  async removeUser(@Param('id') id: string) {
+    const result = await this.usersService.remove(parseInt(id));
+    console.log(result);
+    return { success: true };
   }
 
   @Patch('/:id')
   @UseGuards(AuthGuard) // ✅ 수정 보호
-  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    return this.usersService.update(parseInt(id), body);
+  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+    const user = await this.usersService.update(parseInt(id), body);
+    return { user };
   }
 }

@@ -22,15 +22,14 @@ export class SerializeInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     return handler.handle().pipe(
       map((data: any) => {
+        // { user, ... } 형태일 경우 user만 직렬화
         if (data && typeof data === 'object' && 'user' in data) {
           const serializedUser = plainToClass(this.dto, data.user, {
             excludeExtraneousValues: true,
           });
           return { ...data, user: serializedUser };
         }
-        return plainToClass(this.dto, data, {
-          excludeExtraneousValues: true,
-        });
+        return { ...data };
       }),
     );
   }

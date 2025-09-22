@@ -6,9 +6,10 @@ import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
 import { User } from './user.entity';
 import { CurrentUserMiddleware } from './middlewares/current-user.middleware';
+import { RedisModule } from 'redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), CommonModule],
+  imports: [TypeOrmModule.forFeature([User]), CommonModule, RedisModule],
   controllers: [UsersController],
   providers: [UsersService, AuthService],
 })
