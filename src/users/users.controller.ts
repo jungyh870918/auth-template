@@ -22,6 +22,7 @@ import { User } from './user.entity';
 import { AuthGuard } from '../guards/auth.guard';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { plainToClass } from 'class-transformer';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -46,12 +47,7 @@ export class UsersController {
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.signup(body.email, body.password);
-    console.log(user);
-    console.log(user);
-    console.log(user);
-    console.log(user);
-    console.log(user);
-    console.log(user);
+
     const token = jwt.sign(
       { sub: user.id },
       this.configService.get('JWT_SECRET'),
@@ -59,6 +55,8 @@ export class UsersController {
     );
     session.userId = user.id;
     return user;
+
+    // return { user, accessToken: token };
   }
 
   @Post('/signin')
@@ -70,7 +68,9 @@ export class UsersController {
       this.configService.get('JWT_SECRET'),
       { expiresIn: this.configService.get('JWT_EXPIRES_IN') || '1d' },
     );
-    return user;
+
+    // return user;
+    return { user, accessToken: token };
   }
 
   @Get('/:id')
