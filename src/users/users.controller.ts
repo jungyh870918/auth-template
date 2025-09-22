@@ -20,9 +20,6 @@ import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from './user.entity';
 import { AuthGuard } from '../guards/auth.guard';
-import * as jwt from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
-import { plainToClass } from 'class-transformer';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -30,8 +27,7 @@ export class UsersController {
   constructor(
     private usersService: UsersService,
     private authService: AuthService,
-    private configService: ConfigService,
-  ) {}
+  ) { }
 
   @Get('/whoami')
   @UseGuards(AuthGuard)
@@ -46,31 +42,26 @@ export class UsersController {
 
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
-    const user = await this.authService.signup(body.email, body.password);
-
-    const token = jwt.sign(
-      { sub: user.id },
-      this.configService.get('JWT_SECRET'),
-      { expiresIn: this.configService.get('JWT_EXPIRES_IN') || '1d' },
+    const { user, accessToken, refreshToken } = await this.authService.signup(
+      body.email,
+      body.password,
     );
-    session.userId = user.id;
-    return user;
 
-    // return { user, accessToken: token };
+    session.userId = user.id;
+
+    return { user, accessToken, refreshToken };
   }
 
   @Post('/signin')
   async signin(@Body() body: CreateUserDto, @Session() session: any) {
-    const user = await this.authService.signin(body.email, body.password);
-    session.userId = user.id;
-    const token = jwt.sign(
-      { sub: user.id },
-      this.configService.get('JWT_SECRET'),
-      { expiresIn: this.configService.get('JWT_EXPIRES_IN') || '1d' },
+    const { user, accessToken, refreshToken } = await this.authService.signin(
+      body.email,
+      body.password,
     );
 
-    // return user;
-    return { user, accessToken: token };
+    session.userId = user.id;
+
+    return { user, accessToken, refreshToken };
   }
 
   @Get('/:id')

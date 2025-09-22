@@ -23,6 +23,9 @@ export class User {
   @Column({ default: true })
   admin: boolean;
 
+  @Column({ type: 'int', default: 0 })
+  tokenVersion: number;
+
   @OneToMany(() => Report, (report) => report.user)
   reports: Report[];
 
