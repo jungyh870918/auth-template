@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
@@ -70,5 +71,35 @@ export class AuthService {
     });
 
     return { user, accessToken, refreshToken };
+  }
+
+  async rotateRefreshToken(refreshToken: string) {
+    // 1) refresh 검증 + 서버 상태 확인
+    const payload = await this.tokenService.validateRefreshToken(refreshToken);
+    if (!payload) {
+      throw new UnauthorizedException('invalid or expired refresh token');
+    }
+
+    // 2) 유저/토큰버전 확인 (DB 기준으로 보안 강화)
+    const user = await this.usersService.findOne(payload.sub);
+    if (!user) throw new NotFoundException('user not found');
+    if (user.tokenVersion !== payload.v) {
+      throw new UnauthorizedException('token version mismatch');
+    }
+
+    // 3) 이전 refresh 폐기 (jti)
+    await this.tokenService.invalidateRefreshToken(user.id, payload.jti);
+
+    // 4) 새 access / 새 refresh 발급
+    const accessToken = await this.tokenService.generateAccessToken({
+      id: user.id,
+      tokenVersion: user.tokenVersion,
+    });
+    const newRefreshToken = await this.tokenService.generateRefreshToken({
+      id: user.id,
+      tokenVersion: user.tokenVersion,
+    });
+
+    return { accessToken, refreshToken: newRefreshToken };
   }
 }

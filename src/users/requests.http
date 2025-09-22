@@ -3,7 +3,7 @@ POST http://localhost:3000/auth/signup
 content-type: application/json
 
 {
-  "email": "test55@test.com",
+  "email": "test56@test.com",
   "password": "12345"
 }
 
@@ -12,8 +12,17 @@ POST http://localhost:3000/auth/signin
 content-type: application/json
 
 {
-  "email": "test55@test.com",
+  "email": "test56@test.com",
   "password": "12345"
+}
+
+
+### Refresh (rotate) — refresh 토큰으로 새 access/refresh 발급
+POST http://localhost:3000/auth/refresh
+content-type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsImp0aSI6IjVkY2JjZTFmLTJmNGMtNDdhYy1hMTNjLTMzNTM3YTYwZGIwMCIsInR5cCI6InJlZnJlc2giLCJpYXQiOjE3NTg1NDMwMTgsImV4cCI6MTc1OTE0NzgxOH0.VPYlOYt2MzY9sVeTQpkvta3RGLBfyPrKYhiCS2rIkzA"
 }
 
 ### Get the currently signed in user
