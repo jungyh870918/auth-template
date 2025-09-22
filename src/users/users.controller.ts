@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { RefreshDto } from './dtos/refresh.dto';
 import { UsersService } from './users.service';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
@@ -27,7 +28,7 @@ export class UsersController {
   constructor(
     private usersService: UsersService,
     private authService: AuthService,
-  ) { }
+  ) {}
 
   @Get('/whoami')
   @UseGuards(AuthGuard) // ✅ access token 필요
@@ -36,8 +37,8 @@ export class UsersController {
   }
 
   @Post('/refresh')
-  async refresh(@Body('refreshToken') rt: string) {
-    return this.authService.rotateRefreshToken(rt); // ❌ Guard 필요 없음
+  async refresh(@Body() body: RefreshDto) {
+    return this.authService.rotateRefreshToken(body.refreshToken);
   }
 
   @Post('/signout')

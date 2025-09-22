@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException('Missing Bearer token');
 
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET) as any;
+      const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET) as any;
       req.user = { id: payload.sub };
       return true;
     } catch {

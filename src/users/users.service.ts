@@ -40,4 +40,11 @@ export class UsersService {
     }
     return this.repo.remove(user);
   }
+
+  async incrementTokenVersion(userId: number) {
+    const user = await this.repo.findOne({ where: { id: userId } });
+    if (!user) return;
+    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
+    await this.repo.save(user);
+  }
 }

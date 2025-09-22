@@ -1,4 +1,11 @@
-import { IsEmail, IsString, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsOptional,
+  MinLength,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 
 export class UpdateUserDto {
   @IsEmail()
@@ -7,5 +14,11 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
+  @MinLength(8)
+  @MaxLength(64)
+  @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).*$/, {
+    message:
+      '비밀번호는 대문자, 숫자, 특수문자를 각각 최소 1개 이상 포함해야 합니다',
+  })
   password: string;
 }

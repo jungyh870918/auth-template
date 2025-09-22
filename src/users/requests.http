@@ -3,8 +3,8 @@ POST http://localhost:3000/auth/signup
 content-type: application/json
 
 {
-  "email": "test56@test.com",
-  "password": "12345"
+  "email": "test57@test.com",
+  "password": "Aawef1@@@"
 }
 
 ### Sign in as an existing user
@@ -12,36 +12,40 @@ POST http://localhost:3000/auth/signin
 content-type: application/json
 
 {
-  "email": "test56@test.com",
-  "password": "12345"
+  "email": "test57@test.com",
+  "password": "Aawef1@@@"
 }
-
 
 ### Refresh (rotate) — refresh 토큰으로 새 access/refresh 발급
 POST http://localhost:3000/auth/refresh
 content-type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsImp0aSI6IjVkY2JjZTFmLTJmNGMtNDdhYy1hMTNjLTMzNTM3YTYwZGIwMCIsInR5cCI6InJlZnJlc2giLCJpYXQiOjE3NTg1NDMwMTgsImV4cCI6MTc1OTE0NzgxOH0.VPYlOYt2MzY9sVeTQpkvta3RGLBfyPrKYhiCS2rIkzA"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsInYiOjAsImp0aSI6ImM2NWMzYThmLThiNDctNGQ4Zi04ZjNhLTFmYzk5M2ZhNTY3OCIsInR5cCI6InJlZnJlc2giLCJpYXQiOjE3NTg1NTMzMDIsImV4cCI6MTc1OTE1ODEwMn0.Og5lQ_XkPBmKDutelKCVPuu5AwM5tncJjfeTZREdYpM"
 }
 
-### Get the currently signed in user
+### Get the currently signed in user (protected)
 GET http://localhost:3000/auth/whoami
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
 
 ### Sign out
 POST http://localhost:3000/auth/signout
 
-### Find a particular user with a given ID
+### Find a particular user with a given ID (protected)
 GET http://localhost:3000/auth/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
 
-### Find all users with a given email
+### Find all users with a given email (protected)
 GET http://localhost:3000/auth?email=asdf@asdf.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
 
-### Delete a user given id
+### Delete a user given id (protected)
 DELETE http://localhost:3000/auth/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODU1MjE5OCwiZXhwIjoxNzU4NTUzMDk4fQ.tca5NJg9lpoOb8yGNNaavnhnOGMQbOwMblkuU8stl-Y
 
-### Update a user
+### Update a user (protected)
 PATCH http://localhost:3000/auth/4
+Authorization: Bearer PASTE_ACCESS_TOKEN_HERE
 content-type: application/json
 
 {

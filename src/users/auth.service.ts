@@ -16,7 +16,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private tokenService: TokenService, // ✅ 주입
-  ) { }
+  ) {}
 
   async signup(email: string, password: string) {
     // 1. 이메일 중복 체크
@@ -101,5 +101,26 @@ export class AuthService {
     });
 
     return { accessToken, refreshToken: newRefreshToken };
+  }
+
+  async logout(refreshToken: string) {
+    const payload = await this.tokenService.validateRefreshToken(refreshToken);
+    if (!payload) {
+      throw new UnauthorizedException('invalid or expired refresh token');
+    }
+    await this.tokenService.invalidateRefreshToken(payload.sub, payload.jti);
+    return { ok: true };
+  }
+
+  async logoutAll(userId: number) {
+    // 1) Redis의 모든 refresh 키 삭제
+    await this.tokenService.invalidateAllUserTokens(userId);
+
+    // 2) (권장) tokenVersion 증가 -> 남아있는 access token 즉시 무효화
+    //    access token payload에 v(=tokenVersion)가 들어가 있으므로
+    //    이후의 검증 로직에서 불일치로 거부됨
+    await this.usersService.incrementTokenVersion(userId);
+
+    return { ok: true };
   }
 }

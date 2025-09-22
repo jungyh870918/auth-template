@@ -27,6 +27,8 @@ const cookieSession = require('cookie-session');
       provide: APP_PIPE,
       useValue: new ValidationPipe({
         whitelist: true,
+        forbidNonWhitelisted: true, // DTO에 없는 값 오면 예외 발생
+        transform: true, // 타입 자동 변환
       }),
     },
   ],
