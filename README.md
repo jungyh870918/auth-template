@@ -55,8 +55,6 @@ $ npx typeorm-ts-node-commonjs migration:run -d ./data-source.ts
 # development
 $ npm run start:dev
 
-# production
-$ npm run start:prod
 ```
 
 서버 실행 후 Swagger UI 문서를 브라우저에서 확인할 수 있습니다.
