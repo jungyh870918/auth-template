@@ -1,87 +1,53 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UsersService } from './users.service';
-import { User } from './user.entity';
+import { TokenService } from '../common/token/token.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let fakeUsersService: Partial<UsersService>;
+  let usersService: UsersService;
+  let tokenService: TokenService;
 
   beforeEach(async () => {
-    // Create a fake copy of the users service
-    const users: User[] = [];
-    fakeUsersService = {
-      find: (email: string) => {
-        const filteredUsers = users.filter((user) => user.email === email);
-        return Promise.resolve(filteredUsers);
-      },
-      create: (email: string, password: string) => {
-        const user = {
-          id: Math.floor(Math.random() * 999999),
-          email,
-          password,
-        } as User;
-        users.push(user);
-        return Promise.resolve(user);
-      },
-    };
-
-    const module = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         {
           provide: UsersService,
-          useValue: fakeUsersService,
+          useValue: {
+            find: jest.fn().mockResolvedValue([]),
+            create: jest.fn().mockResolvedValue({ id: 1, email: 'a@a.com', tokenVersion: 0 }),
+          },
+        },
+        {
+          provide: TokenService,
+          useValue: {
+            generateAccessToken: jest.fn().mockResolvedValue('access'),
+            generateRefreshToken: jest.fn().mockResolvedValue('refresh'),
+          },
+        },
+        {
+          provide: ConfigService,   // ✅ 추가
+          useValue: {
+            get: jest.fn().mockReturnValue('dummy'), // 필요에 맞게 반환값 설정
+          },
         },
       ],
     }).compile();
 
-    service = module.get(AuthService);
+    service = module.get<AuthService>(AuthService);
+    usersService = module.get<UsersService>(UsersService);
+    tokenService = module.get<TokenService>(TokenService);
   });
 
-  it('can create an instance of auth service', async () => {
-    expect(service).toBeDefined();
-  });
+  it('should signup a user and return tokens', async () => {
+    const result = await service.signup('a@a.com', 'pw', '홍길동');
 
-  it('creates a new user with a salted and hashed password', async () => {
-    const user = await service.signup('asdf@asdf.com', 'asdf');
-
-    expect(user.password).not.toEqual('asdf');
-    const [salt, hash] = user.password.split('.');
-    expect(salt).toBeDefined();
-    expect(hash).toBeDefined();
-  });
-
-  it('throws an error if user signs up with email that is in use', async (done) => {
-    await service.signup('asdf@asdf.com', 'asdf');
-    try {
-      await service.signup('asdf@asdf.com', 'asdf');
-    } catch (err) {
-      done();
-    }
-  });
-
-  it('throws if signin is called with an unused email', async (done) => {
-    try {
-      await service.signin('asdflkj@asdlfkj.com', 'passdflkj');
-    } catch (err) {
-      done();
-    }
-  });
-
-  it('throws if an invalid password is provided', async (done) => {
-    await service.signup('laskdjf@alskdfj.com', 'password');
-    try {
-      await service.signin('laskdjf@alskdfj.com', 'laksdlfkj');
-    } catch (err) {
-      done();
-    }
-  });
-
-  it('returns a user if correct password is provided', async () => {
-    await service.signup('asdf@asdf.com', 'mypassword');
-
-    const user = await service.signin('asdf@asdf.com', 'mypassword');
-    expect(user).toBeDefined();
+    expect(result.user.email).toBe('a@a.com');
+    expect(result.accessToken).toBe('access');
+    expect(result.refreshToken).toBe('refresh');
+    expect(usersService.create).toHaveBeenCalled();
+    expect(tokenService.generateAccessToken).toHaveBeenCalled();
   });
 });

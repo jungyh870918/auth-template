@@ -3,7 +3,7 @@ POST http://localhost:3000/auth/signup
 content-type: application/json
 
 {
-  "email": "test60@test.com",
+  "email": "test61@test.com",
   "password": "Aawef1@@@",
   "name": "Test User"
 }
@@ -26,8 +26,8 @@ content-type: application/json
 }
 
 ### Get the currently signed in user (protected)
-GET http://localhost:3000/auth/whoami
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODYyNjYzMCwiZXhwIjoxNzU4NjI3NTMwfQ.9iKdoAvqXI9c2aEAg7vLtmGieiby-EGmUvimr0h8Xs8
+GET http://localhost:3000/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjcsInYiOjAsInR5cCI6ImFjY2VzcyIsImlhdCI6MTc1ODYzNDIwMywiZXhwIjoxNzU4NjM1MTAzfQ.QRhT5NxKLgmYxd_O8h8_ANNWIHyWTN6YJeIEnX_UWsg
 
 
 

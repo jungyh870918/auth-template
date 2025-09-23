@@ -87,12 +87,12 @@ export class UsersController {
     return this.authService.signInWithKakao(code);
   }
 
-  @Get('/whoami')
+  @Get('/me')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '현재 로그인한 사용자 정보 조회' })
   @ApiResponse({ status: 200, type: UserDto })
-  whoAmI(@CurrentUser() user: User) {
+  me(@CurrentUser() user: User) {
     return { user };
   }
 

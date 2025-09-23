@@ -62,9 +62,9 @@
         ]
       }
     },
-    "/auth/whoami": {
+    "/auth/me": {
       "get": {
-        "operationId": "UsersController_whoAmI",
+        "operationId": "UsersController_me",
         "parameters": [],
         "responses": {
           "200": {
