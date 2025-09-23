@@ -23,4 +23,10 @@ export class UpdateUserDto {
       '비밀번호는 대문자, 숫자, 특수문자를 각각 최소 1개 이상 포함해야 합니다',
   })
   password: string;
+
+  @IsString()
+  @IsOptional()
+  @MinLength(2)
+  @MaxLength(32)
+  name: string;
 }

@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { SignInUserDto } from './dtos/signin-user.dto';
 import { RefreshDto } from './dtos/refresh.dto';
 import { UsersService } from './users.service';
 import { Serialize } from '../interceptors/serialize.interceptor';
@@ -106,13 +107,14 @@ export class UsersController {
     const { user, accessToken, refreshToken } = await this.authService.signup(
       body.email,
       body.password,
+      body.name
     );
 
     return { user, accessToken, refreshToken };
   }
 
   @Post('/signin')
-  async signin(@Body() body: CreateUserDto) {
+  async signin(@Body() body: SignInUserDto) {
     const { user, accessToken, refreshToken } = await this.authService.signin(
       body.email,
       body.password,
@@ -125,6 +127,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   async findUser(@Param('id') id: string) {
     const user = await this.usersService.findOne(parseInt(id));
+
     if (!user) {
       throw new NotFoundException('user not found');
     }

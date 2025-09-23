@@ -13,8 +13,17 @@ import { ReportsModule } from './reports/reports.module';
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
-    TypeOrmModule.forRoot(),
-    UsersModule,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (cfg: ConfigService) => ({
+        type: 'sqlite',
+        database: cfg.get<string>('DB_NAME', 'db.sqlite'),
+        autoLoadEntities: true,   // 엔티티 자동 로드 (Nest 권장)
+        synchronize: false,       // 개발 중에만 true 가능; 마이그레이션 사용시 false
+        // migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      }),
+    }), UsersModule,
     ReportsModule,
   ],
   controllers: [AppController],

@@ -19,7 +19,7 @@ export class UserDto {
   @Expose()
   providerId?: string | null;
 
-  // oauth 에서 제공하는 이름
+  // oauth 에서 제공하는 이름(예, 닉네임) || 본 서비스 유저 이름
   @Expose()
   name?: string | null;
 

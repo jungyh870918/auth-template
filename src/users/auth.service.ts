@@ -94,7 +94,7 @@ export class AuthService {
     }
   }
 
-  async signup(email: string, password: string) {
+  async signup(email: string, password: string, name: string) {
 
     const users = await this.usersService.find(email);
     if (users.length) {
@@ -107,7 +107,7 @@ export class AuthService {
     const result = `${salt}.${hash.toString('hex')}`;
 
 
-    const user = await this.usersService.create(email, result);
+    const user = await this.usersService.create(email, result, name);
 
 
     const accessToken = await this.tokenService.generateAccessToken({

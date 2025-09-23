@@ -8,7 +8,7 @@ import { GetEstimateDto } from './dtos/get-estimate.dto';
 
 @Injectable()
 export class ReportsService {
-  constructor(@InjectRepository(Report) private repo: Repository<Report>) {}
+  constructor(@InjectRepository(Report) private repo: Repository<Report>) { }
 
   createEstimate({ make, model, lng, lat, year, mileage }: GetEstimateDto) {
     return this.repo
@@ -33,7 +33,8 @@ export class ReportsService {
   }
 
   async changeApproval(id: string, approved: boolean) {
-    const report = await this.repo.findOne(id);
+    // const report = await this.repo.findOne(id);
+    const report = await this.repo.findOneBy({ id: parseInt(id) });
     if (!report) {
       throw new NotFoundException('report not found');
     }
