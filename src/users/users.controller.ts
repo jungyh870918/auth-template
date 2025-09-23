@@ -8,7 +8,6 @@ import {
   Param,
   Query,
   NotFoundException,
-  Session,
   UseGuards,
   Res,
   Inject,
@@ -28,8 +27,11 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { Redis } from 'ioredis';
 import * as crypto from 'crypto';
+import { UseInterceptors } from '@nestjs/common';
+import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 
 @Controller('auth')
+@UseInterceptors(CurrentUserInterceptor)
 @Serialize(UserDto)
 export class UsersController {
   constructor(
@@ -37,7 +39,7 @@ export class UsersController {
     private authService: AuthService,
     private configService: ConfigService,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
-  ) {}
+  ) { }
 
   @Get('/kakao/login')
   async kakaoLogin(@Res() res: Response) {
@@ -77,6 +79,7 @@ export class UsersController {
   @Get('/whoami')
   @UseGuards(AuthGuard) // ✅ access token 필요
   whoAmI(@CurrentUser() user: User) {
+    console.log('user:', user);
     return { user };
   }
 
@@ -86,27 +89,28 @@ export class UsersController {
   }
 
   @Post('/signout')
-  signOut(@Session() session: any) {
-    session.userId = null; // ❌ Guard 선택 사항 (정책에 따라)
+  async signOut(@Body('refreshToken') refreshToken: string) {
+    return this.authService.logout(refreshToken);
   }
 
+
   @Post('/signup')
-  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
+  async createUser(@Body() body: CreateUserDto) {
     const { user, accessToken, refreshToken } = await this.authService.signup(
       body.email,
       body.password,
     );
-    session.userId = user.id;
+
     return { user, accessToken, refreshToken };
   }
 
   @Post('/signin')
-  async signin(@Body() body: CreateUserDto, @Session() session: any) {
+  async signin(@Body() body: CreateUserDto) {
     const { user, accessToken, refreshToken } = await this.authService.signin(
       body.email,
       body.password,
     );
-    session.userId = user.id;
+
     return { user, accessToken, refreshToken };
   }
 

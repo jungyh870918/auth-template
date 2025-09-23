@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 
+// jwt 토큰을 검사하는 가드 (유효성 검사)
 @Injectable()
 export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
@@ -20,6 +21,7 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET) as any;
+      console.log('Verified payload:', payload);
       req.user = { id: payload.sub };
       return true;
     } catch {

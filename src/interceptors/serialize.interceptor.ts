@@ -9,7 +9,7 @@ import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
 
 interface ClassConstructor {
-  new (...args: any[]): {};
+  new(...args: any[]): {};
 }
 
 export function Serialize(dto: ClassConstructor) {
@@ -17,12 +17,12 @@ export function Serialize(dto: ClassConstructor) {
 }
 
 export class SerializeInterceptor implements NestInterceptor {
-  constructor(private dto: any) {}
+  constructor(private dto: any) { }
 
   intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     return handler.handle().pipe(
       map((data: any) => {
-        // { user, ... } 형태일 경우 user만 직렬화
+        // res 값에 user 가 포함되어 있으면 userDto 에 맞게 변환 후 반환
         if (data && typeof data === 'object' && 'user' in data) {
           const serializedUser = plainToClass(this.dto, data.user, {
             excludeExtraneousValues: true,
