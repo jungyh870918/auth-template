@@ -14,8 +14,6 @@ JWT 인증, Refresh Token 로테이션, Redis 캐싱, Kakao OAuth, Swagger 문�
 - Reports 관리 (휴대폰 정보)
   - 생성 (로그인 필요)
   - 전체 조회 (로그인 필요)
-  - 단일 조회 (로그인 필요)
-
 ---
 
 ## Tech Stack
@@ -25,6 +23,13 @@ JWT 인증, Refresh Token 로테이션, Redis 캐싱, Kakao OAuth, Swagger 문�
 - [Redis](https://redis.io/)  
 - [JWT](https://jwt.io/)  
 - [Swagger](https://swagger.io/tools/swagger-ui/)  
+
+
+---
+
+## Docs
+
+- [Redoc 기반 Docs](https://jungyh870918.github.io/auth-template-doc/)  
 
 
 ---

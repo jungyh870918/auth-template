@@ -1,0 +1,605 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/kakao/login": {
+      "get": {
+        "operationId": "UsersController_kakaoLogin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "카카오 로그인 페이지 리다이렉트",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/kakao/callback": {
+      "get": {
+        "operationId": "UsersController_kakaoCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "카카오 로그인 콜백 처리",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/whoami": {
+      "get": {
+        "operationId": "UsersController_whoAmI",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "현재 로그인한 사용자 정보 조회",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "UsersController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "리프레시 토큰 갱신",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/signout": {
+      "post": {
+        "operationId": "UsersController_signOut",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "로그아웃 (리프레시 토큰 무효화)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "회원가입 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "회원가입",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/signin": {
+      "post": {
+        "operationId": "UsersController_signin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignInUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "로그인",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/{id}": {
+      "get": {
+        "operationId": "UsersController_findUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "특정 사용자 조회",
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_removeUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "사용자 삭제",
+        "tags": [
+          "auth"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "사용자 정보 수정",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth": {
+      "get": {
+        "operationId": "UsersController_findAllUsers",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "사용자 전체 조회 (이메일 필터 가능)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/reports": {
+      "post": {
+        "description": "새로운 휴대폰 리포트를 생성합니다.",
+        "operationId": "ReportsController_createReport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "생성된 리포트",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "리포트 생성",
+        "tags": [
+          "Reports"
+        ]
+      }
+    },
+    "/reports/all": {
+      "get": {
+        "description": "등록된 모든 휴대폰 리포트를 조회합니다.",
+        "operationId": "ReportsController_getAllReports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "리포트 목록",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReportDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "모든 리포트 조회",
+        "tags": [
+          "Reports"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Auth API",
+    "description": "회원가입, 로그인, 토큰 갱신 API 문서",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "RefreshDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "Refresh 토큰"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "test@example.com",
+            "description": "사용자 이메일"
+          },
+          "password": {
+            "type": "string",
+            "example": "Aa1234!!",
+            "description": "비밀번호 (최소 8자, 최대 64자, 대문자, 숫자, 특수문자 각각 최소 1개 포함)"
+          },
+          "name": {
+            "type": "string",
+            "example": "홍길동",
+            "description": "사용자 이름 (2~32자)"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1,
+            "description": "사용자 고유 ID"
+          },
+          "email": {
+            "type": "string",
+            "example": "test@example.com",
+            "nullable": true,
+            "description": "이메일 (OAuth 사용자일 경우 null 가능)"
+          },
+          "provider": {
+            "type": "string",
+            "example": "google",
+            "nullable": true,
+            "description": "OAuth 제공자 (google, kakao 등)"
+          },
+          "providerId": {
+            "type": "string",
+            "example": "1234567890",
+            "nullable": true,
+            "description": "OAuth 제공자가 발급한 사용자 ID"
+          },
+          "name": {
+            "type": "string",
+            "example": "홍길동",
+            "nullable": true,
+            "description": "사용자 이름 또는 닉네임"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "example": "https://example.com/avatar.png",
+            "nullable": true,
+            "description": "사용자 프로필 이미지 URL (삭제 예정)"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "provider",
+          "providerId",
+          "name",
+          "avatarUrl"
+        ]
+      },
+      "SignInUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "test@example.com",
+            "description": "사용자 이메일"
+          },
+          "password": {
+            "type": "string",
+            "example": "Aa1234!!",
+            "description": "비밀번호 (최소 8자, 최대 64자, 대문자, 숫자, 특수문자 각각 최소 1개 포함)"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "new@example.com",
+            "description": "수정할 이메일 (선택)"
+          },
+          "password": {
+            "type": "string",
+            "example": "NewPass123!",
+            "description": "수정할 비밀번호 (선택, 최소 8자, 최대 64자, 대문자/숫자/특수문자 각각 최소 1개 포함)"
+          },
+          "name": {
+            "type": "string",
+            "example": "홍길동",
+            "description": "수정할 이름 (선택, 2~32자)"
+          }
+        }
+      },
+      "CreateReportDto": {
+        "type": "object",
+        "properties": {
+          "manufacturer": {
+            "type": "string",
+            "description": "제조사",
+            "example": "Samsung"
+          },
+          "model": {
+            "type": "string",
+            "description": "모델명",
+            "example": "Galaxy S24"
+          },
+          "screenSize": {
+            "type": "number",
+            "description": "화면 크기 (inch)",
+            "example": 6.1,
+            "minimum": 1,
+            "maximum": 10
+          },
+          "price": {
+            "type": "number",
+            "description": "가격",
+            "example": 1200000,
+            "minimum": 0,
+            "maximum": 10000000
+          }
+        },
+        "required": [
+          "manufacturer",
+          "model",
+          "screenSize",
+          "price"
+        ]
+      },
+      "ReportDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "리포트 고유 ID"
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "제조사",
+            "example": "Samsung"
+          },
+          "model": {
+            "type": "string",
+            "description": "모델명",
+            "example": "Galaxy S24"
+          },
+          "screenSize": {
+            "type": "number",
+            "description": "화면 크기 (inch 단위)",
+            "example": 6.8
+          },
+          "price": {
+            "type": "number",
+            "description": "가격 (원)",
+            "example": 1200000
+          },
+          "userId": {
+            "type": "number",
+            "description": "작성자 유저 ID",
+            "example": 1
+          }
+        },
+        "required": [
+          "id",
+          "manufacturer",
+          "model",
+          "screenSize",
+          "price",
+          "userId"
+        ]
+      }
+    }
+  }
+}
