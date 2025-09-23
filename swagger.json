@@ -68,7 +68,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -98,7 +105,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "리프레시 토큰 갱신",
@@ -122,8 +136,15 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "로그아웃 (리프레시 토큰 무효화)",
@@ -152,7 +173,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserDto"
+                  "$ref": "#/components/schemas/AuthResponseDto"
                 }
               }
             }
@@ -180,7 +201,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "로그인",
@@ -204,7 +232,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -231,7 +266,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -268,7 +310,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -297,7 +346,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -398,44 +457,6 @@
       }
     },
     "schemas": {
-      "RefreshDto": {
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "type": "string",
-            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "description": "Refresh 토큰"
-          }
-        },
-        "required": [
-          "refreshToken"
-        ]
-      },
-      "CreateUserDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": "test@example.com",
-            "description": "사용자 이메일"
-          },
-          "password": {
-            "type": "string",
-            "example": "Aa1234!!",
-            "description": "비밀번호 (최소 8자, 최대 64자, 대문자, 숫자, 특수문자 각각 최소 1개 포함)"
-          },
-          "name": {
-            "type": "string",
-            "example": "홍길동",
-            "description": "사용자 이름 (2~32자)"
-          }
-        },
-        "required": [
-          "email",
-          "password",
-          "name"
-        ]
-      },
       "UserDto": {
         "type": "object",
         "properties": {
@@ -484,6 +505,98 @@
           "avatarUrl"
         ]
       },
+      "RefreshDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "Refresh 토큰"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "TokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOi..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOi..."
+          }
+        },
+        "required": [
+          "user",
+          "accessToken",
+          "refreshToken"
+        ]
+      },
+      "LogoutResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "test@example.com",
+            "description": "사용자 이메일"
+          },
+          "password": {
+            "type": "string",
+            "example": "Aa1234!!",
+            "description": "비밀번호 (최소 8자, 최대 64자, 대문자, 숫자, 특수문자 각각 최소 1개 포함)"
+          },
+          "name": {
+            "type": "string",
+            "example": "홍길동",
+            "description": "사용자 이름 (2~32자)"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOi..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOi..."
+          }
+        },
+        "required": [
+          "user",
+          "accessToken",
+          "refreshToken"
+        ]
+      },
       "SignInUserDto": {
         "type": "object",
         "properties": {
@@ -501,6 +614,18 @@
         "required": [
           "email",
           "password"
+        ]
+      },
+      "SuccessResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "success"
         ]
       },
       "UpdateUserDto": {

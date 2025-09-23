@@ -21,6 +21,14 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { SignInUserDto } from './dtos/signin-user.dto';
 import { RefreshDto } from './dtos/refresh.dto';
+
+// 스웨거 문서를 위한 DTO 임포트
+import { AuthResponseDto } from './dtos/auth-response.dto';
+import { TokenResponseDto } from './dtos/token-response.dto';
+import { LogoutResponseDto } from './dtos/logout-response.dto';
+import { SuccessResponseDto } from './dtos/success-response.dto';
+
+
 import { UsersService } from './users.service';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
@@ -33,6 +41,9 @@ import { Response } from 'express';
 import { Redis } from 'ioredis';
 import * as crypto from 'crypto';
 import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
+
+
+
 
 @ApiTags('auth') // Swagger 그룹 이름
 @Controller('auth')
@@ -80,25 +91,28 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '현재 로그인한 사용자 정보 조회' })
+  @ApiResponse({ status: 200, type: UserDto })
   whoAmI(@CurrentUser() user: User) {
     return { user };
   }
 
   @Post('/refresh')
   @ApiOperation({ summary: '리프레시 토큰 갱신' })
+  @ApiResponse({ status: 201, type: TokenResponseDto })
   async refresh(@Body() body: RefreshDto) {
     return await this.authService.rotateRefreshToken(body.refreshToken);
   }
 
   @Post('/signout')
   @ApiOperation({ summary: '로그아웃 (리프레시 토큰 무효화)' })
+  @ApiResponse({ status: 200, type: LogoutResponseDto })
   async signOut(@Body() body: RefreshDto) {
     return this.authService.logout(body.refreshToken);
   }
 
   @Post('/signup')
   @ApiOperation({ summary: '회원가입' })
-  @ApiResponse({ status: 201, description: '회원가입 성공', type: UserDto })
+  @ApiResponse({ status: 201, description: '회원가입 성공', type: AuthResponseDto })
   async createUser(@Body() body: CreateUserDto) {
     const { user, accessToken, refreshToken } = await this.authService.signup(
       body.email,
@@ -110,6 +124,7 @@ export class UsersController {
 
   @Post('/signin')
   @ApiOperation({ summary: '로그인' })
+  @ApiResponse({ status: 201, type: AuthResponseDto })
   async signin(@Body() body: SignInUserDto) {
     const { user, accessToken, refreshToken } = await this.authService.signin(
       body.email,
@@ -122,6 +137,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '특정 사용자 조회' })
+  @ApiResponse({ status: 200, type: UserDto })
   async findUser(@Param('id') id: string) {
     const user = await this.usersService.findOne(parseInt(id));
     if (!user) {
@@ -133,12 +149,14 @@ export class UsersController {
         HttpStatus.NOT_FOUND, // 404
       );
     }
-    return { user };
+    return user;
   }
+
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 전체 조회 (이메일 필터 가능)' })
+  @ApiResponse({ status: 200, type: [UserDto] })
   findAllUsers(@Query('email') email: string) {
     return this.usersService.find(email);
   }
@@ -147,8 +165,9 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 삭제' })
+  @ApiResponse({ status: 200, type: SuccessResponseDto })
   async removeUser(@Param('id') id: string) {
-    const result = await this.usersService.remove(parseInt(id));
+    await this.usersService.remove(parseInt(id));
     return { success: true };
   }
 
@@ -156,8 +175,8 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '사용자 정보 수정' })
+  @ApiResponse({ status: 200, type: UserDto })
   async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    const user = await this.usersService.update(parseInt(id), body);
-    return { user };
+    return await this.usersService.update(parseInt(id), body);
   }
 }

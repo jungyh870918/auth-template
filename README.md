@@ -14,6 +14,7 @@ JWT 인증, Refresh Token 로테이션, Redis 캐싱, Kakao OAuth, Swagger 문�
 - Reports 관리 (휴대폰 정보)
   - 생성 (로그인 필요)
   - 전체 조회 (로그인 필요)
+
 ---
 
 ## Tech Stack
@@ -24,13 +25,11 @@ JWT 인증, Refresh Token 로테이션, Redis 캐싱, Kakao OAuth, Swagger 문�
 - [JWT](https://jwt.io/)  
 - [Swagger](https://swagger.io/tools/swagger-ui/)  
 
-
 ---
 
 ## Docs
 
 - [Redoc 기반 Docs](https://jungyh870918.github.io/auth-template-doc/)  
-
 
 ---
 
@@ -39,7 +38,6 @@ JWT 인증, Refresh Token 로테이션, Redis 캐싱, Kakao OAuth, Swagger 문�
 ```bash
 $ npm install
 ```
-
 
 ---
 
@@ -79,6 +77,13 @@ http://localhost:3000/docs
   "message": "토큰이 존재하지 않습니다 (Missing Bearer token)"
 }
 ```
+
+---
+
+## Testing with REST Client
+
+각 `user`, `report` 폴더에 존재하는 `requests.http` 파일과  
+VSCode REST Client Extension을 사용하여 간단히 API 테스트를 할 수 있습니다.
 
 ---
 
