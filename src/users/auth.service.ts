@@ -5,6 +5,8 @@ import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
+  HttpException,
+  HttpStatus
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
@@ -98,7 +100,13 @@ export class AuthService {
 
     const users = await this.usersService.find(email);
     if (users.length) {
-      throw new BadRequestException('email in use');
+      throw new HttpException(
+        {
+          code: 'DUPLICATE_EMAIL',
+          message: '이메일 중복',
+        },
+        HttpStatus.CONFLICT,
+      );
     }
 
 
@@ -123,19 +131,30 @@ export class AuthService {
   }
 
   async signin(email: string, password: string) {
-
     const [user] = await this.usersService.find(email);
-    if (!user) {
-      throw new NotFoundException('user not found');
-    }
 
+    if (!user) {
+      throw new HttpException(
+        {
+          code: 'AUTH_INVALID_CREDENTIALS',
+          message: '이메일/비밀번호 불일치',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     const [salt, storedHash] = user.password.split('.');
     const hash = (await scrypt(password, salt, 32)) as Buffer;
-    if (storedHash !== hash.toString('hex')) {
-      throw new BadRequestException('bad password');
-    }
 
+    if (storedHash !== hash.toString('hex')) {
+      throw new HttpException(
+        {
+          code: 'AUTH_INVALID_CREDENTIALS',
+          message: '이메일/비밀번호 불일치',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     const accessToken = await this.tokenService.generateAccessToken({
       id: user.id,
@@ -151,25 +170,42 @@ export class AuthService {
 
   // access 토큰 갱신하면서 refresh 토큰도 재발급 (보안 강화 목적)
   async rotateRefreshToken(refreshToken: string) {
-
     const payload = await this.tokenService.validateRefreshToken(refreshToken);
     if (!payload) {
-      throw new UnauthorizedException('invalid or expired refresh token');
+      throw new HttpException(
+        {
+          code: 'AUTH_INVALID_CREDENTIALS',
+          message: '유효하지 않거나 만료된 RefreshToken',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
-
     const user = await this.usersService.findOne(payload.sub);
-    if (!user) throw new NotFoundException('user not found');
+    if (!user) {
+      throw new HttpException(
+        {
+          code: 'AUTH_INVALID_CREDENTIALS',
+          message: '유효하지 않은 사용자',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     // 강제로그아웃, 혹은 모든기기에서 로그아웃 할 경우 유저 tokenVersion 증가된 상태
     // 예전 버전의 refresh token 으로 갱신하려고 하면 거부당함
     if (user.tokenVersion !== payload.v) {
-      throw new UnauthorizedException('token version mismatch');
+      throw new HttpException(
+        {
+          code: 'AUTH_REFRESH_REVOKED',
+          message: '회수/무효화된 RefreshToken',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     // 특정 유저의 refresh token 식별 jwt payload 의 jti(=jwt id) 값
     await this.tokenService.invalidateRefreshToken(user.id, payload.jti);
-
 
     const accessToken = await this.tokenService.generateAccessToken({
       id: user.id,

@@ -9,7 +9,8 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  UnauthorizedException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 
@@ -23,15 +24,40 @@ export class AuthGuard implements CanActivate {
         ? auth.slice(7)
         : null;
 
-    if (!token) throw new UnauthorizedException('Missing Bearer token');
+    // 토큰이 아예 없는 경우
+    if (!token) {
+      throw new HttpException(
+        {
+          code: 'AUTH_INVALID_CREDENTIALS',
+          message: '토큰이 존재하지 않습니다 (Missing Bearer token)',
+        },
+        HttpStatus.UNAUTHORIZED, // 401
+      );
+    }
 
     try {
       const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET) as any;
-      console.log('Verified payload:', payload);
       req.user = { id: payload.sub };
       return true;
-    } catch {
-      throw new UnauthorizedException('Invalid token');
+    } catch (err: any) {
+      // jwt.verify 실패: 기간 만료 or 위조된 토큰
+      if (err.name === 'TokenExpiredError') {
+        throw new HttpException(
+          {
+            code: 'AUTH_TOKEN_EXPIRED',
+            message: 'AccessToken 만료',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      throw new HttpException(
+        {
+          code: 'AUTH_INVALID_CREDENTIALS',
+          message: '유효하지 않은 토큰',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
   }
 }

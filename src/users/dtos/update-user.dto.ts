@@ -8,12 +8,22 @@ import {
   MaxLength,
   Matches,
 } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateUserDto {
+  @ApiPropertyOptional({
+    example: 'new@example.com',
+    description: '수정할 이메일 (선택)',
+  })
   @IsEmail()
   @IsOptional()
   email: string;
 
+  @ApiPropertyOptional({
+    example: 'NewPass123!',
+    description:
+      '수정할 비밀번호 (선택, 최소 8자, 최대 64자, 대문자/숫자/특수문자 각각 최소 1개 포함)',
+  })
   @IsString()
   @IsOptional()
   @MinLength(8)
@@ -24,6 +34,10 @@ export class UpdateUserDto {
   })
   password: string;
 
+  @ApiPropertyOptional({
+    example: '홍길동',
+    description: '수정할 이름 (선택, 2~32자)',
+  })
   @IsString()
   @IsOptional()
   @MinLength(2)

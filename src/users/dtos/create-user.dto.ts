@@ -6,11 +6,21 @@ import {
   MaxLength,
   Matches,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
+  @ApiProperty({
+    example: 'test@example.com',
+    description: '사용자 이메일',
+  })
   @IsEmail()
   email: string;
 
+  @ApiProperty({
+    example: 'Aa1234!!',
+    description:
+      '비밀번호 (최소 8자, 최대 64자, 대문자, 숫자, 특수문자 각각 최소 1개 포함)',
+  })
   @IsString()
   @MinLength(8)
   @MaxLength(64)
@@ -20,6 +30,10 @@ export class CreateUserDto {
   })
   password: string;
 
+  @ApiProperty({
+    example: '홍길동',
+    description: '사용자 이름 (2~32자)',
+  })
   @IsString()
   @MinLength(2)
   @MaxLength(32)
