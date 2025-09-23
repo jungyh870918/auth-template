@@ -13,6 +13,8 @@ import {
   Inject,
   BadRequestException,
   UseInterceptors,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -122,10 +124,17 @@ export class UsersController {
   @ApiOperation({ summary: '특정 사용자 조회' })
   async findUser(@Param('id') id: string) {
     const user = await this.usersService.findOne(parseInt(id));
-    if (!user) throw new NotFoundException('user not found');
+    if (!user) {
+      throw new HttpException(
+        {
+          code: 'AUTH_USER_NOT_FOUND',
+          message: '해당 사용자를 찾을 수 없습니다',
+        },
+        HttpStatus.NOT_FOUND, // 404
+      );
+    }
     return { user };
   }
-
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth()

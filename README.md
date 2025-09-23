@@ -1,30 +1,58 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Auth & Reports API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS 기반의 인증 및 간단한 리포트 관리 백엔드 프로젝트입니다.  
+JWT 인증, Refresh Token 로테이션, Redis 캐싱, Kakao OAuth, Swagger 문서화를 포함합니다.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- 회원가입 / 로그인 / 로그아웃
+- Access / Refresh Token 발급 및 갱신 (Redis 기반 jti 관리)
+- Kakao OAuth 로그인 (state 검증 포함)
+- 사용자 관리 (조회 / 수정 / 삭제)
+- Reports 관리 (휴대폰 정보)
+  - 생성 (로그인 필요)
+  - 전체 조회 (로그인 필요)
+  - 단일 조회 (로그인 필요)
+
+---
+
+## Tech Stack
+
+- [NestJS](https://nestjs.com/)  
+- [TypeORM](https://typeorm.io/) (SQLite)  
+- [Redis](https://redis.io/)  
+- [JWT](https://jwt.io/)  
+- [Swagger](https://swagger.io/tools/swagger-ui/)  
+
+---
+
+## Project Structure
+
+```
+src/
+├── users/
+│   ├── dtos/
+│   ├── user.entity.ts
+│   ├── users.controller.ts
+│   ├── users.service.ts
+│   └── auth.service.ts
+├── reports/
+│   ├── dtos/
+│   ├── report.entity.ts
+│   ├── reports.controller.ts
+│   └── reports.service.ts
+├── guards/
+│   ├── auth.guard.ts
+│   └── admin.guard.ts
+├── interceptors/
+│   └── serialize.interceptor.ts
+├── main.ts
+└── app.module.ts
+```
+
+---
 
 ## Installation
 
@@ -32,42 +60,134 @@
 $ npm install
 ```
 
+---
+
+## Environment Variables
+
+`.env` 파일을 프로젝트 루트에 생성합니다.
+
+```env
+DB_NAME=db.sqlite
+COOKIE_KEY=your_cookie_secret
+JWT_ACCESS_SECRET=your_access_secret
+JWT_ACCESS_EXPIRES=15m
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_REFRESH_EXPIRES=7d
+TOKEN_HASH_SECRET=your_token_hash_secret
+KAKAO_REST_API_KEY=your_kakao_key
+KAKAO_REDIRECT_URI=http://localhost:3000/auth/kakao/callback
+```
+
+---
+
+## Database Migration
+
+```bash
+$ npx typeorm-ts-node-commonjs migration:run -d ./data-source.ts
+```
+
+---
+
 ## Running the app
 
 ```bash
 # development
-$ npm run start
-
-# watch mode
 $ npm run start:dev
 
-# production mode
+# production
 $ npm run start:prod
 ```
 
-## Test
+서버 실행 후 Swagger UI 문서를 브라우저에서 확인할 수 있습니다.
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+http://localhost:3000/docs
 ```
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## API Examples
 
-## Stay in touch
+### Create a report (로그인 필요)
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```http
+POST /reports
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+
+{
+  "manufacturer": "Samsung",
+  "model": "Galaxy S24",
+  "screenSize": 6,
+  "price": 1200000
+}
+```
+
+### Get all reports (로그인 필요)
+
+```http
+GET /reports/all
+Authorization: Bearer <accessToken>
+```
+
+### 회원가입
+
+```http
+POST /auth/signup
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "Aawef1@@@",
+  "name": "Test User"
+}
+```
+
+### 로그인
+
+```http
+POST /auth/signin
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "Aawef1@@@"
+}
+```
+
+### Refresh Token 갱신
+
+```http
+POST /auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "<refreshToken>"
+}
+```
+
+### 현재 로그인된 유저
+
+```http
+GET /auth/whoami
+Authorization: Bearer <accessToken>
+```
+
+---
+
+## Error Response Format
+
+모든 예외는 `HttpException`을 통해 다음과 같은 JSON 형태로 반환됩니다.
+
+```json
+{
+  "code": "AUTH_INVALID_CREDENTIALS",
+  "message": "토큰이 존재하지 않습니다 (Missing Bearer token)"
+}
+```
+
+---
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+[MIT](LICENSE)
