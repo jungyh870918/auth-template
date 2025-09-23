@@ -6,7 +6,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.enableCors({
+    origin: ['http://localhost:3000'], // 허용할 프론트엔드 주소
+    credentials: true,                 // 쿠키/인증 헤더 포함 여부
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'], // 허용할 메서드
+  });
   const config = new DocumentBuilder()
     .setTitle('Auth API')
     .setDescription('회원가입, 로그인, 토큰 갱신 API 문서')

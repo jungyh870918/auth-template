@@ -6,6 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
+// rate limiting 장치
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -13,15 +15,21 @@ import { ReportsModule } from './reports/reports.module';
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60,    // 60초 단위
+        limit: 20,  // 1분 동안 20회 요청 가능
+      },
+    ]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) => ({
         type: 'sqlite',
         database: cfg.get<string>('DB_NAME', 'db.sqlite'),
-        autoLoadEntities: true,   // 엔티티 자동 로드 (Nest 권장)
-        synchronize: false,       // 개발 중에만 true 가능; 마이그레이션 사용시 false
-        // migrations: [__dirname + '/migrations/*{.ts,.js}'],
+        autoLoadEntities: true,
+        synchronize: false,
+
       }),
     }), UsersModule,
     ReportsModule,
