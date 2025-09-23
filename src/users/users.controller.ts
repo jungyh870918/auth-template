@@ -30,6 +30,8 @@ import { Redis } from 'ioredis';
 import * as crypto from 'crypto';
 import { UseInterceptors } from '@nestjs/common';
 import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
+import { Admin } from 'typeorm';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('auth')
 @UseInterceptors(CurrentUserInterceptor)
@@ -97,8 +99,9 @@ export class UsersController {
   }
 
   @Post('/signout')
-  async signOut(@Body('refreshToken') refreshToken: string) {
-    return this.authService.logout(refreshToken);
+  async signOut(@Body() body: RefreshDto) {
+    console.log('refreshToken:', body.refreshToken);
+    return this.authService.logout(body.refreshToken);
   }
 
 

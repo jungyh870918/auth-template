@@ -22,17 +22,23 @@ POST http://localhost:3000/auth/refresh
 content-type: application/json
 
 {
-  "refreshToken": "PASTE_REFRESH_TOKEN_HERE"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJ2IjowLCJqdGkiOiI0YTA1MDk1ZS0wMGI2LTQ2OGQtYTM2ZC01MDliNDNlYzg2MmMiLCJ0eXAiOiJyZWZyZXNoIiwiaWF0IjoxNzU4NjE3MzM1LCJleHAiOjE3NTkyMjIxMzV9.DlHpd1Zcy8MozUN51RqvAsrBL20CLYla5BKbVCcNmq0"
 }
 
 ### Get the currently signed in user (protected)
 GET http://localhost:3000/auth/whoami
-Authorization: Bearer PASTE_ACCESS_TOKEN_HERE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJ2IjowLCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3NTg2MTgxMDYsImV4cCI6MTc1ODYxOTAwNn0.Dld93NmsvjSTouyFEOIt9Qozmp6MFcbNjppbrQ7E5nY
+
+
+
 
 ### Sign out (로그아웃)
 POST http://localhost:3000/auth/signout
-Authorization: Bearer PASTE_ACCESS_TOKEN_HERE
+content-type: application/json
 
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJ2IjowLCJqdGkiOiI5YTgyYmRhMC05OTQ0LTQwZmUtYTY1MC1jZDZjOWFmZTY0YTIiLCJ0eXAiOiJyZWZyZXNoIiwiaWF0IjoxNzU4NjE3Nzc0LCJleHAiOjE3NTkyMjI1NzR9.xqhaethssdXEAEaMOuTofkENWJs-WCQsjIzI1K8Ksbg"
+}
 ### Find a particular user with a given ID (protected)
 GET http://localhost:3000/auth/6
 Authorization: Bearer PASTE_ACCESS_TOKEN_HERE
