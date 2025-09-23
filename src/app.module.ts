@@ -6,9 +6,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
-import { User } from './users/user.entity';
-import { Report } from './reports/report.entity';
-const cookieSession = require('cookie-session');
 
 @Module({
   imports: [
@@ -26,23 +23,17 @@ const cookieSession = require('cookie-session');
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({
+        // DTO 검증 설정, 필요없는 값 제거
         whitelist: true,
-        forbidNonWhitelisted: true, // DTO에 없는 값 오면 예외 발생
-        transform: true, // 타입 자동 변환
+        // DTO 에 존재하지 않는 값 오면 예외 발생 (보안 강화)
+        forbidNonWhitelisted: true,
+        // 타입 자동 변환 (예: '42' -> 42)
+        transform: true,
       }),
     },
   ],
 })
 export class AppModule {
-  constructor(private configService: ConfigService) {}
 
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(
-        cookieSession({
-          keys: [this.configService.get('COOKIE_KEY')],
-        }),
-      )
-      .forRoutes('*');
-  }
+
 }

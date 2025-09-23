@@ -5,7 +5,7 @@ import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private repo: Repository<User>) {}
+  constructor(@InjectRepository(User) private repo: Repository<User>) { }
 
   create(email: string, password: string) {
     const user = this.repo.create({ email, password });
@@ -41,6 +41,8 @@ export class UsersService {
     return this.repo.remove(user);
   }
 
+  //incrementTokenVersion 는 강제 로그아웃, 전체 로그아웃에서만 사용
+  // 만약 일반 로그아웃에서 사용할 경우 다른 기기에 저장된 토큰 버전이 전부 오래된 버전이 되어버림
   async incrementTokenVersion(userId: number) {
     const user = await this.repo.findOne({ where: { id: userId } });
     if (!user) return;

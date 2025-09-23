@@ -18,9 +18,9 @@ const scrypt = promisify(_scrypt);
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private tokenService: TokenService, // ✅ 주입
+    private tokenService: TokenService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async signInWithKakao(code: string) {
     try {
@@ -37,20 +37,24 @@ export class AuthService {
         redirect_uri,
         code,
       });
+
+      // 현재 카카오 앱 콘솔 설정에서는 secret 사용하지 않음으로 해둠, 그래서 현재는 옵션처리
       if (client_secret) body.append('client_secret', client_secret);
+
 
       const tokenRes = await axios.post(
         'https://kauth.kakao.com/oauth/token',
         body,
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
       );
-      console.log('tokenRes.data:', tokenRes.data);
 
       const kakaoAccessToken = tokenRes.data.access_token as string;
+
 
       const meRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
         headers: { Authorization: `Bearer ${kakaoAccessToken}` },
       });
+
       console.log('meRes.data:', meRes.data);
 
       const kakaoId = String(meRes.data.id);
@@ -59,6 +63,7 @@ export class AuthService {
       const email: string | undefined = kakaoAccount.email;
       const name: string | undefined = profile.nickname;
       const avatarUrl: string | undefined = profile.profile_image_url;
+
 
       const user = await this.usersService.upsertOAuthUser({
         provider: 'kakao',
@@ -90,21 +95,21 @@ export class AuthService {
   }
 
   async signup(email: string, password: string) {
-    // 1. 이메일 중복 체크
+
     const users = await this.usersService.find(email);
     if (users.length) {
       throw new BadRequestException('email in use');
     }
 
-    // 2. 비밀번호 해싱
+
     const salt = randomBytes(8).toString('hex');
     const hash = (await scrypt(password, salt, 32)) as Buffer;
     const result = `${salt}.${hash.toString('hex')}`;
 
-    // 3. 유저 생성
+
     const user = await this.usersService.create(email, result);
 
-    // 4. 토큰 발급
+
     const accessToken = await this.tokenService.generateAccessToken({
       id: user.id,
       tokenVersion: user.tokenVersion,
@@ -118,20 +123,20 @@ export class AuthService {
   }
 
   async signin(email: string, password: string) {
-    // 1. 유저 조회
+
     const [user] = await this.usersService.find(email);
     if (!user) {
       throw new NotFoundException('user not found');
     }
 
-    // 2. 비밀번호 검증
+
     const [salt, storedHash] = user.password.split('.');
     const hash = (await scrypt(password, salt, 32)) as Buffer;
     if (storedHash !== hash.toString('hex')) {
       throw new BadRequestException('bad password');
     }
 
-    // 3. 토큰 발급
+
     const accessToken = await this.tokenService.generateAccessToken({
       id: user.id,
       tokenVersion: user.tokenVersion,
@@ -144,24 +149,28 @@ export class AuthService {
     return { user, accessToken, refreshToken };
   }
 
+  // access 토큰 갱신하면서 refresh 토큰도 재발급 (보안 강화 목적)
   async rotateRefreshToken(refreshToken: string) {
-    // 1) refresh 검증 + 서버 상태 확인
+
     const payload = await this.tokenService.validateRefreshToken(refreshToken);
     if (!payload) {
       throw new UnauthorizedException('invalid or expired refresh token');
     }
 
-    // 2) 유저/토큰버전 확인 (DB 기준으로 보안 강화)
+
     const user = await this.usersService.findOne(payload.sub);
     if (!user) throw new NotFoundException('user not found');
+
+    // 강제로그아웃, 혹은 모든기기에서 로그아웃 할 경우 유저 tokenVersion 증가된 상태
+    // 예전 버전의 refresh token 으로 갱신하려고 하면 거부당함
     if (user.tokenVersion !== payload.v) {
       throw new UnauthorizedException('token version mismatch');
     }
 
-    // 3) 이전 refresh 폐기 (jti)
+    // 특정 유저의 refresh token 식별 jwt payload 의 jti(=jwt id) 값
     await this.tokenService.invalidateRefreshToken(user.id, payload.jti);
 
-    // 4) 새 access / 새 refresh 발급
+
     const accessToken = await this.tokenService.generateAccessToken({
       id: user.id,
       tokenVersion: user.tokenVersion,
@@ -184,12 +193,10 @@ export class AuthService {
   }
 
   async logoutAll(userId: number) {
-    // 1) Redis의 모든 refresh 키 삭제
+
     await this.tokenService.invalidateAllUserTokens(userId);
 
-    // 2) (권장) tokenVersion 증가 -> 남아있는 access token 즉시 무효화
-    //    access token payload에 v(=tokenVersion)가 들어가 있으므로
-    //    이후의 검증 로직에서 불일치로 거부됨
+    // tokenVersion 올리기 (기존 토큰 무효화)
     await this.usersService.incrementTokenVersion(userId);
 
     return { ok: true };

@@ -3,6 +3,6 @@ import { TokenModule } from './token/token.module';
 
 @Module({
     imports: [TokenModule],
-    exports: [TokenModule],  // ⬅️ Re-export
+    exports: [TokenModule],
 })
 export class CommonModule { }

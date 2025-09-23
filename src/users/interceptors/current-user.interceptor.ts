@@ -1,4 +1,5 @@
-// src/users/interceptors/current-user.interceptor.ts
+// auth guard 에서 심은 req.user.id를 바탕으로 실제 user 엔티티를 찾아 req.currentUser에 심어주는 인터셉터
+
 import {
   Injectable, NestInterceptor, ExecutionContext, CallHandler,
 } from '@nestjs/common';
@@ -10,9 +11,7 @@ export class CurrentUserInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler) {
     const req = context.switchToHttp().getRequest();
-    const userId: number | undefined = req.user?.id; // ✅ 올바른 추출
-    console.log('CurrentUser Interceptor - req.user:', req.user);
-    // 가드가 안 붙은 라우트(= 비인증)에서는 req.user가 없으니 그냥 스킵
+    const userId: number | undefined = req.user?.id;
     if (userId) {
       const user = await this.usersService.findOne(userId);
       req.currentUser = user ?? null;

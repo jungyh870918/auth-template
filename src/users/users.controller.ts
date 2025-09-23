@@ -41,12 +41,15 @@ export class UsersController {
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) { }
 
+
   @Get('/kakao/login')
   async kakaoLogin(@Res() res: Response) {
     const clientId = this.configService.get<string>('KAKAO_REST_API_KEY')!;
     const redirectUri = this.configService.get<string>('KAKAO_REDIRECT_URI')!;
+
+    // CSRF 공격 방지용 state 생성 및 저장
     const state = crypto.randomUUID();
-    await this.redis.set(`oauth:state:${state}`, '1', 'EX', 300); // 5분 TTL
+    await this.redis.set(`oauth:state:${state}`, '1', 'EX', 300);
 
     const url =
       `https://kauth.kakao.com/oauth/authorize?response_type=code` +
@@ -56,11 +59,13 @@ export class UsersController {
     return res.redirect(url); // 인터셉터 영향 없음
   }
 
+  // CSRF 공격으로 잘못된(다른 계정의) 코드가 들어올 수 있으므로 state 검증 필수
   @Get('/kakao/callback')
   async kakaoCallback(
     @Query('code') code: string,
     @Query('state') state: string,
   ) {
+
     if (!state) {
       throw new BadRequestException('missing state');
     }
@@ -69,15 +74,17 @@ export class UsersController {
 
     const saved = await this.redis.getdel(key);
 
+    // saved === 1 일 경우 state 키가 존재했고, 삭제까지 완료된 상태
     if (!saved) {
       throw new BadRequestException('invalid state');
     }
+
 
     return this.authService.signInWithKakao(code);
   }
 
   @Get('/whoami')
-  @UseGuards(AuthGuard) // ✅ access token 필요
+  @UseGuards(AuthGuard)
   whoAmI(@CurrentUser() user: User) {
     console.log('user:', user);
     return { user };
@@ -115,7 +122,7 @@ export class UsersController {
   }
 
   @Get('/:id')
-  @UseGuards(AuthGuard) // ✅ 유저 정보 보호
+  @UseGuards(AuthGuard)
   async findUser(@Param('id') id: string) {
     const user = await this.usersService.findOne(parseInt(id));
     if (!user) {
@@ -125,13 +132,13 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(AuthGuard) // ✅ 유저 검색 보호
+  @UseGuards(AuthGuard)
   findAllUsers(@Query('email') email: string) {
     return this.usersService.find(email);
   }
 
   @Delete('/:id')
-  @UseGuards(AuthGuard) // ✅ 삭제 보호
+  @UseGuards(AuthGuard)
   async removeUser(@Param('id') id: string) {
     const result = await this.usersService.remove(parseInt(id));
     console.log(result);
@@ -139,7 +146,7 @@ export class UsersController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard) // ✅ 수정 보호
+  @UseGuards(AuthGuard)
   async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     const user = await this.usersService.update(parseInt(id), body);
     return { user };

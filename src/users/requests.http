@@ -21,12 +21,12 @@ POST http://localhost:3000/auth/refresh
 content-type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwLCJ2IjowLCJqdGkiOiIzMmU0ODc0ZC1iYWY5LTQ1MDYtODBhOS0zMTgxZWRkMWVhMzYiLCJ0eXAiOiJyZWZyZXNoIiwiaWF0IjoxNzU4NTk2Nzk0LCJleHAiOjE3NTkyMDE1OTR9.hheC3NPjYYK_m-dqPBUup1QLKqcLsNi5htXVYA7nZzA"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwLCJ2IjowLCJqdGkiOiI3MzMzZDc4OS1kOTdhLTRlZTMtOGMwYi02ZWQxODNhMTdkZDMiLCJ0eXAiOiJyZWZyZXNoIiwiaWF0IjoxNzU4NTk5Njg0LCJleHAiOjE3NTkyMDQ0ODR9.SFT33hYid_kSFEtxdZnvLiZStDWwgax9WcVKRIbwVLw"
 }
 
 ### Get the currently signed in user (protected)
 GET http://localhost:3000/auth/whoami
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwLCJ2IjowLCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3NTg1OTY0MzAsImV4cCI6MTc1ODU5NzMzMH0.45ai6AhkClCVDIgd9sT71szr-yZyeDMQ5J3AKVIcEKs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwLCJ2IjowLCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3NTg1OTk2OTgsImV4cCI6MTc1ODYwMDU5OH0.s0weAlbnlsSxd_X4edCPmMaB6noANd_2NNZJMpcTfm4
 
 ### Sign out
 POST http://localhost:3000/auth/signout
