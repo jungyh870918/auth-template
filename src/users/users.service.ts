@@ -70,7 +70,8 @@ export class UsersService {
         password: '!',
         provider,
         providerId,
-        // name, avatarUrl 컬럼이 있으면 할당
+        name: name ?? null,
+
       });
     }
     return this.repo.save(user);

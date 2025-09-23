@@ -6,29 +6,17 @@ export class Report {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: false })
-  approved: boolean;
+  @Column()
+  manufacturer: string; // 제조사
 
   @Column()
-  price: number;
+  model: string; // 모델명
 
   @Column()
-  make: string;
+  screenSize: number; // 화면 크기 (inch 단위 등)
 
   @Column()
-  model: string;
-
-  @Column()
-  year: number;
-
-  @Column()
-  lng: number;
-
-  @Column()
-  lat: number;
-
-  @Column()
-  mileage: number;
+  price: number; // 가격
 
   @ManyToOne(() => User, (user) => user.reports)
   user: User;

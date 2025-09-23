@@ -64,7 +64,7 @@ export class AuthService {
       const name: string | undefined = profile.nickname;
       const avatarUrl: string | undefined = profile.profile_image_url;
 
-
+      console.log('kakaoId, email, name, avatarUrl:', kakaoId, email, name, avatarUrl);
       const user = await this.usersService.upsertOAuthUser({
         provider: 'kakao',
         providerId: kakaoId,
